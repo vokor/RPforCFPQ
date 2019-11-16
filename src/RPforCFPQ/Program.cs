@@ -5,8 +5,7 @@ using Parser;
 using Parser.Grammars;
 using Parser.Graphs;
 using Parser.Relational;
-using Parser.Utilities;
-using System.Collections.Generic;
+using Parser.Valuations;
 
 namespace RPforCFPQ
 {
@@ -18,7 +17,11 @@ namespace RPforCFPQ
             IAtomEngineFactory atomEngineFactory = new DagAtomEngineFactory(engineFactory);
             
             DictionaryGraphEngineFactory dictionaryGraphEngineFactory = new DictionaryGraphEngineFactory();
-            CommutativeWrapEngineFactory commutativeWrapEngineFactory =new CommutativeWrapEngineFactory(null);
+            
+            IGraphEngineFactory engineFactory1 = new DictionaryGraphEngineFactory();
+            DagWrapEngineFactory dagWrapEngineFactory = new DagWrapEngineFactory(engineFactory1);
+            
+            CommutativeWrapEngineFactory commutativeWrapEngineFactory = new CommutativeWrapEngineFactory(dagWrapEngineFactory);
             IRelationEngineFactory relationEngineFactory =
                 new DagRelationEngineFactory(commutativeWrapEngineFactory, dictionaryGraphEngineFactory);
             IRelationOperantFactory relationOperantFactory = new RelationOperantFactory(relationEngineFactory);
@@ -29,11 +32,25 @@ namespace RPforCFPQ
                 new RelationalParserGenerator(atomEngineFactory, 
                     relationOperantFactory, false, atomicOptimizations);
 
-            List<Char[]> inputs = new List<char[]>();
-            inputs.Add(new []{'(', '(', ')', '(', ')', ')'});
+            //List<Char[]> inputs = new List<char[]>();
+            //inputs.Add(new []{'(', '(', ')', '(', ')', ')'});
             
-            IValuationSemiring<TValue>
-            parserGenerator.CreateParser(SampleGrammar.Parentheses, )
+            BooleanSemiring  valuationSemiring = new BooleanSemiring();
+            var parser = parserGenerator.CreateParser(SampleGrammar.Parentheses, valuationSemiring);
+
+            var result = parser.Run("((()())", () =>
+            {
+                //Console.WriteLine("ok");
+            });
+
+            if (result)
+            {
+                Console.WriteLine("OK");
+            }
+            else
+            {
+                Console.WriteLine("Error");
+            }
         }
     }
 } 
